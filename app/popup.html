@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"> 
+    <head>
+
+        <!-- Meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- title placeholder -->
+        <title>Zendesk Alerts</title>
+        
+        <!-- Bootstrap integration -->
+        <link href="/app/api/bootstrap.min.css" rel="stylesheet">
+        <script
+			src="/app/api/bootstrap.bundle.min.js">
+		</script>
+
+        <!--  Jquery integration -->
+        <script
+            src="/app/api/jquery.js">
+        </script>
+  
+        <!-- Page integration -->
+        <link href="/app/popup.css" rel="stylesheet" type="text/css" />
+        <script src="/app/popup.js"></script>
+
+    </head>
+    <body style="width: 400px;">
+        <div class="card shadow border-0">
+            <div class="card-body">
+                <h2 class="h4 mb-1">Patch:</h2>
+                <p class="small text-muted font-italic mb-2">Fix the website view limit and replace the list...</p>
+                <div class="form-switch mb-2 ">
+                    <input class="form-check-input" Type="checkbox", id="patch" />
+                    <label class="" for="patch">Enable Zendesk UI Enhancement</label>
+                </div>
+                <h2 class="h4 mb-1">Views:</h2>
+                <p class="small text-muted font-italic mb-2">Select views you would like to receive alerts for...</p>
+                <ul id="views" class="list-group overflow-auto ps-1" style="max-height: 200px;"></ul>
+                <h2 class="h4 mb-1">Alerts:</h2>
+                <p on class="small text-muted font-italic mb-2">Select the type of alert notifications you want...</p>
+                <ul class="list-group overflow-auto ps-1" style="max-height: 200px;">
+                    <li class="form-check-control form-switch my-1 py-1">
+                        <input class="form-check-input" type="checkbox" id="push" />
+                        <label class="form-check-label ps-2" for="push">Push Notification</label>
+                    </li>
+                    <li class="form-check-control form-switch my-1 py-1">
+                        <input class="form-check-input" type="checkbox" id="sound" />
+                        <label class="form-check-label ps-2" for="sound">Sound Notification</label>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>
