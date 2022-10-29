@@ -2,8 +2,9 @@
     "manifest_version": 3,
     "name": "Zendesk Alerts",
     "version": "0.1",
-    "description": "List new tickets for the clients you need to track.",
+    "description": "Alert to new tickets for the clients you need to track of!",
     "permissions": [
+        "notifications",
         "scripting",
         "activeTab",
         "storage"
@@ -20,14 +21,5 @@
     "background": {
         "service_worker": "scripts/background.js",
         "type": "module"
-    },
-    "content_scripts": [
-        {
-            "run_at": "document_idle",
-            "js": ["scripts/content.js"],
-            "matches": [
-                "https://insourceservices.zendesk.com/*"
-            ]
-        }
-    ]
-  }
+    }
+}

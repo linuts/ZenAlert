@@ -10,14 +10,14 @@
         <title>Zendesk Alerts</title>
         
         <!-- Bootstrap integration -->
-        <link href="/app/api/bootstrap.min.css" rel="stylesheet">
+        <link href="/api/bootstrap.min.css" rel="stylesheet">
         <script
-			src="/app/api/bootstrap.bundle.min.js">
+			src="/api/bootstrap.bundle.min.js">
 		</script>
 
         <!--  Jquery integration -->
         <script
-            src="/app/api/jquery.js">
+            src="/api/jquery.js">
         </script>
   
         <!-- Page integration -->
@@ -26,25 +26,57 @@
 
     </head>
     <body style="width: 400px;">
-        <div class="card shadow border-0">
-            <div class="card-body">
-                <h2 class="h4 mb-1">Patch:</h2>
-                <p class="small text-muted font-italic mb-2">Fix the website view limit and replace the list...</p>
-                <div class="form-switch mb-2 ">
-                    <input class="form-check-input" Type="checkbox", id="patch" />
-                    <label class="" for="patch">Enable Zendesk UI Enhancement</label>
+
+        <nav class="navbar bg-light p-0">
+            <div class="container-fluid">
+                    <h1 class="navbar-brand text-primary mb-0"><b>Zendesk Alerts</b></h1>
+                <div class="d-flex">
+                    <p class="navbar-brand mb-0">
+                        <img src="https://insourceservices.zendesk.com/system/photos/5916011789211/Insource-Services-Alexander-Libby-original-09637LinkedIn.jpeg" alt="Logo" width="20" height="20" class="d-inline-block rounded-circle">
+                        Alexander Libby
+                    </p>
                 </div>
+              </div>
+            </div>
+          </nav>
+
+          <section class="card-body">
+            <div class="border-bottom shadow ps-3 pt-3">
+                <h2 class="h4 mb-1 pb-2">Views:</h2>
+                <p class="small text-muted font-italic mb-2 pb-2">Select views you would like to receive alerts for...</p>
+            </div>
+            <ul id="views2" class="list-group overflow-auto p-2 pe-3" style="max-height: 200px;"">
+            </ul>
+        </section>
+
+        <section class="p-3 border-top">
+            <h2 class="h4 mb-1">Alerts:</h2>
+            <p on class="small text-muted font-italic mb-2">Select the type of alert notifications you want...</p>
+            <ul class="list-group overflow-auto ps-1" style="max-height: 200px;">
+                <li class="form-check-control form-switch my-1">
+                    <input class="form-check-input" type="checkbox" id="push" />
+                    <label class="form-check-label ps-2" for="push">Push Notification</label>
+                </li>
+                <li class="form-check-control form-switch my-1">
+                    <input class="form-check-input" type="checkbox" id="sound" />
+                    <label class="form-check-label ps-2" for="sound">Sound Notification</label>
+                </li>
+            </ul>
+        </section>
+
+        <div class="card shadow border-0" hidden>
+            <div class="card-body">
                 <h2 class="h4 mb-1">Views:</h2>
                 <p class="small text-muted font-italic mb-2">Select views you would like to receive alerts for...</p>
-                <ul id="views" class="list-group overflow-auto ps-1" style="max-height: 200px;"></ul>
+                <ul id="views" class="list-group overflow-auto border ps-1" style="max-height: 200px;"></ul>
                 <h2 class="h4 mb-1">Alerts:</h2>
                 <p on class="small text-muted font-italic mb-2">Select the type of alert notifications you want...</p>
                 <ul class="list-group overflow-auto ps-1" style="max-height: 200px;">
-                    <li class="form-check-control form-switch my-1 py-1">
+                    <li class="form-check-control form-switch my-1">
                         <input class="form-check-input" type="checkbox" id="push" />
                         <label class="form-check-label ps-2" for="push">Push Notification</label>
                     </li>
-                    <li class="form-check-control form-switch my-1 py-1">
+                    <li class="form-check-control form-switch my-1">
                         <input class="form-check-input" type="checkbox" id="sound" />
                         <label class="form-check-label ps-2" for="sound">Sound Notification</label>
                     </li>
