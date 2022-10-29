@@ -1,4 +1,5 @@
 $(document).ready(function() {
+    //chrome.tabs.create({url:"https://insourceservices.zendesk.com/access/sso?role=agent"});
     $("#push").change(setting_change);
     $("#sound").change(setting_change);
     load_setting($("#push"), "push");
@@ -32,6 +33,8 @@ $(document).ready(function() {
             $("#user").show();
             $("#user").append(me.user.name);
             $("#user img").prop("src", me.user.photo.mapped_content_url);
+        }).fail(function() {
+            chrome.tabs.create({url:"https://insourceservices.zendesk.com/access/sso?role=agent"});
         });
     }
 
@@ -61,15 +64,21 @@ $(document).ready(function() {
         console.log("Save", save);
         chrome.storage.sync.set(save);
 
-        chrome.notifications.create('test', {
-            type: 'basic',
-            iconUrl: 'images/Zendesk.png',
-            title: 'Test Message',
-            message: 'You are awesome!',
-            priority: 2
-        });
+        if($(this).attr('id') == "push" && $(this).is(':checked')) {
+            chrome.notifications.create('test_'+Math.floor((Math.random() * 1000) + 1), {
+                type: 'basic',
+                iconUrl: '/images/Zendesk.png',
+                title: 'Zen Alert!',
+                contextMessage: 'You have a new ticket.',
+                message: 'Example push message...',
+                priority: 2,
+                requireInteraction: true
+            });
+        }
 
-        //var notification = new Audio(chrome.runtime.getURL("/sounds/E6thChord.wav"));
-        //notification.volume = .05;
-        //notification.play();
+        if($(this).attr('id') == "sound" && $(this).is(':checked')) {
+            var notification = new Audio(chrome.runtime.getURL("/sounds/E6thChord.wav"));
+            notification.volume = .05;
+            notification.play();
+        }
 }
