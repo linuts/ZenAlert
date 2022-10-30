@@ -10,7 +10,7 @@ $(document).ready(function() {
     $.getJSON("https://insourceservices.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical", function( data ) { 
         for(view in data.views) {
             if(data.views[view].restriction != null && data.views[view].restriction.type == "Group") {
-                let input = $("<input/>", {"class":"form-check-input", "type":"checkbox", "id":"push"});
+                let input = $("<input/>", {"class":"form-check-input", "type":"checkbox", "id":"view_"+ data.views[view].id});
                 let link = $("<a/>", {"class":"form-check-label link-primary ps-2", "href":"https://insourceservices.zendesk.com/agent/filters/"+data.views[view].id, "text":data.views[view].title});
                 let count = $("<span/>", {"class":"badge bg-primary rounded-pill"})
                 $("#views").append($("<li/>", {"class":"list-group-item d-flex justify-content-between align-items-center"}).append([
@@ -18,13 +18,13 @@ $(document).ready(function() {
                 ]));
                 input.change(setting_change);
                 set_ticket_count(count, data.views[view].id);
-                load_setting(input, "input_"+data.views[view].id);
+                load_setting(input, "view_"+data.views[view].id);
                 $(link).click(function(){
                     chrome.tabs.create({url:$(this).attr('href')});
                 });
             }
         }
-        $("#views").slideDown(1500);
+        $("#views").slideDown(1000);
     });
 
     function set_user_info() {
@@ -65,7 +65,7 @@ $(document).ready(function() {
         chrome.storage.sync.set(save);
 
         if($(this).attr('id') == "push" && $(this).is(':checked')) {
-            chrome.notifications.create('test_'+Math.floor((Math.random() * 1000) + 1), {
+            chrome.notifications.create('example_'+Math.floor((Math.random() * 1000) + 1), {
                 type: 'basic',
                 iconUrl: '/images/Zendesk.png',
                 title: 'Zen Alert!',
