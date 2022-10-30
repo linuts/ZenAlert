@@ -40,13 +40,25 @@
               </div>
             </div>
         </nav>
+
+
         <section class="card-body">
             <div class="border-bottom shadow ps-3 pt-3">
-                <h2 class="h4 mb-1">Views:</h2>
+                
+                <nav class="d-flex justify-content-between">
+                    <h2 class="h4">Views:</h2>
+                    <ul class="pagination pagination-sm pe-3 m-0">
+                        <li class="page-item h4 active">
+                            <button id="view_insource" class="page-link">Insource</button>
+                        </li>
+                        <li class="page-item h4">
+                            <button id="view_personal" class="page-link" href="#">Personal</button>
+                        </li>
+                    </ul>
+                </nav>
                 <p class="small text-muted font-italic mb-1 pb-2">Select views you would like to receive alerts for...</p>
             </div>
-            <ul id="views" class="list-group overflow-auto p-2 pe-3" style="max-height: 235px;">
-            </ul>
+            <ul id="views" class="list-group overflow-auto p-2 pe-3" style="max-height: 230px;">
         </section>
 
         <section class="p-3 border-top">
@@ -63,5 +75,6 @@
                 </li>
             </ul>
         </section>
+        <p class="position-absolute bottom-0 end-0 fw-lighter text-muted mb-1 me-1" style="font-size: 4pt;">App created by Alexander Libby. Sound affects created by James Spellman.</p>
     </body>
 </html>
