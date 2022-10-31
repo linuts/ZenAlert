@@ -25,6 +25,7 @@ function update_views(type) {
                 ]));
                 input.change(checkbox_setting_change);
                 set_ticket_count(count, data.views[view].id);
+                chrome.runtime.sendMessage({addView: data.views[view]});
                 checkbox_load_setting(input, "view_"+data.views[view].id);
                 $(link).click(function(){
                     chrome.tabs.create({url:$(this).attr('href')});
@@ -41,6 +42,7 @@ function update_views(type) {
             $("#user").show();
             $("#user").append(me.user.name);
             $("#user img").prop("src", me.user.photo.mapped_content_url);
+            chrome.runtime.sendMessage({loggedin: true});
         }).fail(function() {
             chrome.tabs.create({url:"https://insourceservices.zendesk.com/access/sso?role=agent"});
         });
@@ -74,18 +76,25 @@ function update_views(type) {
             chrome.notifications.create('example_'+Math.floor((Math.random() * 1000) + 1), {
                 type: 'basic',
                 iconUrl: '/images/Zendesk.png',
-                title: 'Zen Alert!',
-                contextMessage: 'You have a new ticket.',
+                title: 'Zen Alert',
+                contextMessage: 'You have a new ticket!',
                 message: 'Example push message...',
-                priority: 2,
-                requireInteraction: true
+                priority: 2
             });
-        }
+        } else if($(this).attr('id') == "sound" && $(this).is(':checked')) {
+                var notification = new Audio(chrome.runtime.getURL("/sounds/E6thChord.wav"));
+                notification.volume = .04;
+                notification.play();
+        } else {
+            var notification = null;
 
-        if($(this).attr('id') == "sound" && $(this).is(':checked')) {
-            var notification = new Audio(chrome.runtime.getURL("/sounds/E6thChord.wav"));
-            notification.volume = .05;
-            notification.play();
+            if ($(this).is(':checked')) {
+                var change = new Audio(chrome.runtime.getURL("/sounds/SettingOn.wav"));
+            } else {
+                var change = new Audio(chrome.runtime.getURL("/sounds/SettingOff.wav"));
+            }
+            change.volume = .01;
+            change.play();
         }
 }
 
