@@ -1,12 +1,12 @@
 {
     "manifest_version": 3,
-    "name": "Zendesk Alerts",
-    "version": "0.1",
-    "description": "Alert to new tickets for the clients you need to track of!",
+    "name": "ZenAlert",
+    "version": "0.5",
+    "description": "A better way to view clients you need to track of!",
     "permissions": [
         "notifications",
-        "scripting",
         "activeTab",
+        "scripting",
         "storage"
     ],
     "icons": {
@@ -18,6 +18,13 @@
     "action": {
         "default_popup": "app/popup.html"
     },
+    "content_scripts": [
+        {
+          "matches": ["https://insourceservices.zendesk.com/agent/*"],
+          "js": ["api/bootstrap.bundle.min.js", "api/jquery.js", "scripts/content.js"],
+          "css": ["api/bootstrap.min.css"]
+        }
+      ],
     "background": {
         "service_worker": "scripts/background.js",
         "type": "module"
