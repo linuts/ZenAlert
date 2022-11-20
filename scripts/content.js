@@ -36,9 +36,7 @@ var checkExist = setInterval(function() {
 }, 10);
 
 function view_load_setting() {
-    console.log("Read", "view_type");
     chrome.storage.sync.get("view_type", function(result) {
-        console.log("Read", "view_type", result["view_type"]);
         if(result["view_type"] == "User") {
             $("#view_assigned").parent().removeClass('active');
             $("#view_personal").parent().addClass('active');
@@ -58,9 +56,9 @@ function view_load_setting() {
     });
 }
 
-async function load_title(title) {
-    const title_var = title.replaceAll(" ","-");
-    return load_setting(`title_${title_var}`);
+async function load_title(viewId) {
+
+    return load_setting(`title_${viewId}`);
 }
 
 async function update_views(type) {
@@ -92,22 +90,27 @@ async function update_views(type) {
         }));
     }
     for(view in data.views) {
+        let title = data.views[view].title;
+        let loaded_title = await load_title(data.views[view].id);
+        if(loaded_title) {
+            title = loaded_title;
+        }
+        let ticket_link = $("<a/>", {
+            "class":"form-check-label link-primary text-start",
+            "data-view-id":+data.views[view].id,
+            "href":"/agent/filters/"+data.views[view].id,
+            "title": data.views[view].title,
+            "id": `a_${data.views[view].id}`,
+            "text":title
+        });
+        ticket_link.click(view_clicked);
+        let ticket_count = $("<span/>", {"class":"badge rounded-pill"});
+        set_ticket_count(ticket_count, data.views[view].id);
+
         if(data.views[view].restriction && (data.views[view].restriction.type === type || !type)) {
-            let title = data.views[view].title;
-            let loaded_title = await load_title(data.views[view].title);
-            if(loaded_title) {
-                title = loaded_title;
-            }
             let ticket_alert = $("<input/>", {"class":"me-2", "type":"checkbox", "id":"view_"+ data.views[view].id});
-            let ticket_link = $("<a/>", {
-                "class":"form-check-label link-primary text-start",
-                "data-view-id":+data.views[view].id,
-                "href":"/agent/filters/"+data.views[view].id,
-                "title": data.views[view].title,
-                "id": `a_${data.views[view].title.replaceAll(" ","-")}`,
-                "text":title
-            });
-            let ticket_count = $("<span/>", {"class":"badge rounded-pill"});
+            ticket_alert.change(checkbox_setting_change);
+            checkbox_set_setting(ticket_alert, "view_"+data.views[view].id);
             list.append($("<li/>", {"class":"list-group-item d-flex border border-0 justify-content-between align-items-center"}).append([
                 $("<div/>", {
                     "class":"pe-2",
@@ -115,23 +118,7 @@ async function update_views(type) {
                 }).append([ticket_alert, ticket_link]),
                     ticket_count
             ]));
-
-            ticket_link.click(view_clicked);
-
-            set_ticket_count(ticket_count, data.views[view].id);
-            ticket_alert.change(checkbox_setting_change);
-            checkbox_set_setting(ticket_alert, "view_"+data.views[view].id);
         } else if(data.views[view].restriction && type === "Checked" && await load_setting(`view_${data.views[view].id}`)) {
-            let title = data.views[view].title;
-            let ticket_link = $("<a/>", {
-                "class":"form-check-label link-primary text-start",
-                "data-view-id":+data.views[view].id,
-                "href":"/agent/filters/"+data.views[view].id,
-                "title": title,
-                "id": `a_${data.views[view].title.replaceAll(" ","-")}`,
-                "text":title
-            });
-            let ticket_count = $("<span/>", {"class":"badge rounded-pill"});
             list.append($("<li/>", {"class":"list-group-item d-flex border border-0 justify-content-between align-items-center"}).append([
                 $("<div/>", {
                     "class":"pe-2",
@@ -139,9 +126,6 @@ async function update_views(type) {
                 }).append(ticket_link),
                     ticket_count
             ]));
-
-            ticket_link.click(view_clicked);
-            set_ticket_count(ticket_count, data.views[view].id);
         }
     }
     if(type === "Checked") {
@@ -180,25 +164,21 @@ async function load_setting(key) {
 
 async function checkbox_set_setting(element, key) {
    const data = await load_setting(key);
-    console.log("Read", key, data);
     $(element).prop('checked', data);
 }
 
 function checkbox_setting_change() {
     let save = {};
     save[$(this).attr('id')] = $(this).is(':checked');
-    console.log("Save", save);
     chrome.storage.sync.set(save);
 }
 
 function view_setting_change() {
-    console.log( "Click", $(this).attr('id'));
     let save = {};
     if($(this).attr('id') == "view_assigned") {
         save["view_type"] = "Group";
         update_views("Group");
         chrome.storage.sync.set(save);
-        console.log("view_assigned");
         $("#view_assigned").parent().addClass('active');
         $("#view_personal").parent().removeClass('active');
         $("#view_watching").parent().removeClass('active');
@@ -206,7 +186,6 @@ function view_setting_change() {
         save["view_type"] = "User";
         update_views("User");
         chrome.storage.sync.set(save);
-        console.log("view_personal");
         $("#view_assigned").parent().removeClass('active');
         $("#view_personal").parent().addClass('active');
         $("#view_watching").parent().removeClass('active');
@@ -214,7 +193,6 @@ function view_setting_change() {
         save["view_type"] = "Checked";
         update_views("Checked");
         chrome.storage.sync.set(save);
-        console.log("view_watching");
         $("#view_assigned").parent().removeClass('active');
         $("#view_personal").parent().removeClass('active');
         $("#view_watching").parent().addClass('active');
@@ -223,7 +201,6 @@ function view_setting_change() {
 
 async function set_ticket_count(element, viewId) {
     let count = await get_ticket_count(viewId);
-    console.log("Count: ",count);
     if (element.length) {
         element.append(""+count+"");
         if(count == 0) {
@@ -244,7 +221,6 @@ async function get_brand() {
             resolve(viewData);
         });
     });
-    console.log(await brands);
     for(brand in brands.brands) {
         if(brands.brands[brand].subdomain == subdomain) {
             return brands.brands[brand];
@@ -273,7 +249,7 @@ function view_clicked() {
     view_title.append($("<div/>", {"class":"container"}))
         .append($("<input/>", {
             "class":"form-control border-0 fs-3 p-0",
-            "id": $(this).attr("title").replaceAll(" ","-"),
+            "id": `${$(this).attr("id").replaceAll("a_", "t_")}`,
             "placeholder": $(this).attr("title"),
             "style":"overflow: hidden; white-space: nowrap; text-overflow: ellipsis;",
             "value": $(this).text()
@@ -285,8 +261,8 @@ function view_clicked() {
             new_title = $(e.target).attr('placeholder');
         }
         let save = {};
-        save[`title_${$(e.target).attr('id')}`] = new_title;
+        save[`title_${$(e.target).attr('id').replaceAll("t_", "")}`] = new_title;
         chrome.storage.sync.set(save);
-        $(`#a_${$(e.target).attr("id")}`).text(new_title);
+        $(`#${$(e.target).attr("id").replaceAll("t_", "a_")}`).text(new_title);
     });
 }
