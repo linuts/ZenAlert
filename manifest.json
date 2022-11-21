@@ -1,7 +1,7 @@
 {
     "manifest_version": 3,
     "name": "ZenAlert",
-    "version": "0.5",
+    "version": "1.0",
     "description": "A better way to view clients you need to track of!",
     "permissions": [
         "notifications",
@@ -14,7 +14,10 @@
         "32": "images/Zendesk.png",
         "48": "images/Zendesk.png",
         "128": "images/Zendesk.png"
-      },
+    },
+     "action": {
+        "default_popup": "app/popup.html"
+    },
     "content_scripts": [
         {
           "matches": ["https://insourceservices.zendesk.com/agent/*"],

@@ -6,6 +6,7 @@ $(document).ready(function() {
     $("#z-icon").addClass("pb-5");
 })
 
+// All views have loaded, time to overide!
 var checkExist = setInterval(function() {
     if ($("[data-test-id=views_views-list_row]").length) {
         view_title = $("[data-test-id=views_views-header]").parent();
@@ -29,9 +30,9 @@ var checkExist = setInterval(function() {
         view_personal.click(view_setting_change);
         view_watching.click(view_setting_change);
 
-        clearInterval(checkExist);
-
         chrome.runtime.sendMessage({loaded: "Ready"});
+
+        clearInterval(checkExist);
     }
 }, 10);
 
@@ -57,7 +58,6 @@ function view_load_setting() {
 }
 
 async function load_title(viewId) {
-
     return load_setting(`title_${viewId}`);
 }
 
@@ -128,6 +128,7 @@ async function update_views(type) {
             ]));
         }
     }
+    /* Not used yet :)
     if(type === "Checked") {
         list.append($("<section/>", {"class":"border-top", "style":"margin-top: 10px !important; padding-top: 10px !important;"})).append([
             $("<p/>", {"class":"text-muted font-italic mb-1", "text":"Select the type of alert notifications would like...", "style":"margin-left: 10px !important;"}),
@@ -143,6 +144,7 @@ async function update_views(type) {
             ])
         ]);
     }
+    */
 
     if(!views_container.html()){
         views_container.append(list);
@@ -151,14 +153,9 @@ async function update_views(type) {
 
 async function load_setting(key) {
     return data = new Promise(function(resolve, reject){
-        try {
-            chrome.storage.sync.get(key, function(result) {
-                resolve(result[key]);
-            })
-        }
-        catch (e) {
-            reject(e);
-        }
+        chrome.storage.sync.get(key, function(result) {
+            resolve(result[key]);
+        })
     });
 }
 
