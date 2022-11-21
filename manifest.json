@@ -2,12 +2,12 @@
     "manifest_version": 3,
     "name": "ZenAlert",
     "version": "1.0",
-    "description": "A better way to view clients you need to track of!",
+    "description": "A better way to track your tickets. ZenAlert will enhance your views and improve your productivity!",
     "permissions": [
-        "notifications",
-        "activeTab",
-        "scripting",
-        "storage"
+        "notifications"
+        //"activeTab",
+        //"scripting",
+        //"storage"
     ],
     "icons": {
         "16": "images/Zendesk.png",
