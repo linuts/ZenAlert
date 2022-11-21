@@ -17,8 +17,12 @@ chrome.runtime.onMessage.addListener(function(request) {
           for(let view in live) {
             if(view_tracker[view]) {
               if(view_tracker[view][1] < live[view][1]) {
+                // A ticket was Created
                 console.log(`New ticket for "${live[view][0]}"!`);
                 new_ticket_alert(view, live[view][0]);
+                view_tracker[view][1] = live[view][1];
+              } else if(view_tracker[view][1] > live[view][1]) {
+                // A ticket was closed
                 view_tracker[view][1] = live[view][1];
               }
             } else {

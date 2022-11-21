@@ -4,10 +4,8 @@
     "version": "1.0",
     "description": "A better way to track your tickets. ZenAlert will enhance your views and improve your productivity!",
     "permissions": [
-        "notifications"
-        //"activeTab",
-        //"scripting",
-        //"storage"
+        "notifications",
+        "storage"
     ],
     "icons": {
         "16": "images/Zendesk.png",
