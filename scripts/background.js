@@ -1,84 +1,130 @@
-let view_tracker = {};
-let is_scanning = false;
+var VIEW_TRACKER = {}; // Holds last view sync
 
-self.addEventListener('install', (event) => {
-  console.log("install");
-});
+// Load counts for a view
+async function get_ticket_count(viewId) {
+  const response = await fetch(`https://insourceservices.zendesk.com/api/v2/views/${viewId}/count.json`);
+  return (await response.json()).view_count.value;
+}
 
-chrome.runtime.onMessage.addListener(function(request) {
-  if(is_scanning) {
-    console.log("pass");
+// Load clients into VIEW_TRACKER var
+async function load_active_views() {
+  // Pull the list of views
+  const response = await fetch('https://insourceservices.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical');
+  const views = await response.json();
+  for(let view in views.views) {
+    view = views.views[view];
+
+    // Some client (Group) views are not restricted...
+    let type = "Group";
+    if(view.restriction) {
+      type = view.restriction.type;
+    }
+
+    let title = "";
+    const loaded_title = await load_setting(`title_${view.id}`);
+    if(loaded_title) {
+      title = loaded_title;
+    }
+
+    // Create a data object for the view
+    VIEW_TRACKER[view.id] = {
+      "url": view.url,
+      "raw_title": view.title,
+      "user_title": title,
+      "type": type,
+      "count": await get_ticket_count(view.id)
+    }
   }
-  if(!is_scanning && request.loaded == "Ready") {
-    is_scanning = true;
-    setInterval(function() {
-      try {
-        alerting_views_sync().then((live) => {
-          for(let view in live) {
-            if(view_tracker[view]) {
-              if(view_tracker[view][1] < live[view][1]) {
-                // A ticket was Created
-                console.log(`New ticket for "${live[view][0]}"!`);
-                new_ticket_alert(view, live[view][0]);
-                view_tracker[view][1] = live[view][1];
-              } else if(view_tracker[view][1] > live[view][1]) {
-                // A ticket was closed
-                view_tracker[view][1] = live[view][1];
-              }
-            } else {
-              view_tracker[view] = live[view];
-              console.log("Added view:", live[view]);
-            }
-          }
-        });
-      } catch (error) {
-        console.log("Failed to load tickets, retry in 1 minute...");
-      }
-    }, 60000);
-  }
-});
+}
 
-function new_ticket_alert(viewId, viewTitle) {
-  const randId = `Alert_${viewId}_${Math.floor(Math.random() * 1000)}`;
-  chrome.notifications.create(randId, {
+// OS push notification
+function push_message(message, viewTitle) {
+  console.log("OS Notification: ", message, viewTitle);
+  chrome.notifications.create({
     type: 'basic',
     iconUrl: '/images/Zendesk.png',
     title: 'Zen Alert!',
-    contextMessage: 'You have a new ticket for:',
+    contextMessage: message,
     message: viewTitle,
     priority: 1
   })
 }
 
-async function alerting_views_sync() {
-  const data = await load_views();
-  let view = {};
-  for(let data_view in data.views) {
-    if(data.views[data_view].restriction && await load_setting(`view_${data.views[data_view].id}`)) {
-      let id = data.views[data_view].id;
-      let title = await load_setting(`title_${id}`);
-      let count = await get_ticket_count(data.views[data_view].id)
-      let count_value = await count.view_count;
-      view[id] = [title, count_value.value];
-    }
+// Create a ticket view update alarm (needs to run once)
+chrome.alarms.create("sync-view-alarm", {
+  delayInMinutes: 0, // Try to update views at start
+  periodInMinutes: 1 // Keep trying on fail..
+});
+
+// Create a ticket count update alarm
+chrome.alarms.create("sync-count-alarm", {
+  delayInMinutes: 0.1, // Hold while views load...
+  periodInMinutes: 1.5 // Update count every 90 seconds
+});
+
+chrome.alarms.onAlarm.addListener(async function(alarm) {
+  console.log("Alarm call:", alarm.name);
+  switch (alarm.name) {
+
+    case "sync-view-alarm":
+      if(!Object.keys(VIEW_TRACKER).length) {
+        load_active_views();
+      } else {
+        chrome.alarms.clear(alarm.name);
+        console.log("Clear: ", alarm.name);
+      }
+      break;
+
+    case "sync-count-alarm":
+      console.log("Views", VIEW_TRACKER);
+      for(let view in VIEW_TRACKER) {
+        const last_count = VIEW_TRACKER[view].count;
+        const this_count = await get_ticket_count(view);
+        if(last_count != this_count) {
+          let title = VIEW_TRACKER[view].raw_title;
+          if(VIEW_TRACKER[view].user_title) {
+            title = VIEW_TRACKER[view].user_title
+          }
+          // The count changed... send message to user (if watching)
+          if(await load_setting(`view_${view}`)) {
+            if(last_count < this_count) {
+              // A new ticket has been created
+              push_message("A ticket has been opened for:", title);
+            } else if(last_count > this_count) {
+              // A ticket has been closed, update count
+              push_message( "A ticket has been closed for:", title);
+            }
+          }
+          // Update the VIEW_TRACKER count
+          VIEW_TRACKER[view].count = this_count;
+        }
+      }
+      break;
+
+    default:
+      // No Used
+      break;
   }
-  return view;
-}
+});
 
-async function load_views() {
-  const response = await fetch('https://insourceservices.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical');
-  return await response.json();
-}
-
-async function get_ticket_count(viewId) {
-  const response = await fetch(`https://insourceservices.zendesk.com/api/v2/views/${viewId}/count.json`);
-  return await response.json();
-}
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log("message:", message);
+  if (message === 'Sync_Views') {
+    // This will send view data to content.js on request
+    sendResponse(VIEW_TRACKER);
+  } else if(message[0].includes("title_")) {
+    // Update if the user sets a title
+    // ( this code is yucky and hacked together, needs work!)
+    const viewId = message[0].split("_")[1];
+    const viewUserTitle = message[1];
+    VIEW_TRACKER[viewId].user_title = viewUserTitle;
+  }
+});
 
 async function load_setting(key) {
   return new Promise(function(resolve, reject){
       chrome.storage.sync.get(key, function(result) {
           resolve(result[key]);
-      });
+      })
   });
 }

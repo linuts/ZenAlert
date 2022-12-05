@@ -5,7 +5,8 @@
     "description": "A better way to track your tickets. ZenAlert will enhance your views and improve your productivity!",
     "permissions": [
         "notifications",
-        "storage"
+        "storage",
+        "alarms"
     ],
     "icons": {
         "16": "images/Zendesk.png",
@@ -20,7 +21,7 @@
         {
           "matches": ["https://insourceservices.zendesk.com/agent/*"],
           "js": ["api/bootstrap.bundle.min.js", "api/jquery.js", "scripts/content.js"],
-          "css": ["api/bootstrap.min.css"]
+          "css": ["api/bootstrap.min.css", "style/content.css"]
         }
       ],
     "background": {
