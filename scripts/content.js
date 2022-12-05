@@ -1,3 +1,13 @@
+
+/*
+<div class="property_box" style="
+    padding-right: 0px;
+    padding-left: 0px;
+    margin-left: 25px;
+">
+
+*/
+
 var views_container; // Elemment that holds the views.
 var view_title; // The title of the active view.
 const subdomain = window.location.origin.replace("https://", '').split(".")[0]; // Find client name
@@ -105,7 +115,7 @@ function view_setting_change() {
 
 async function update_views(type) {
     $("[data-test-id=views_views-list_header-refresh]").click(view_load_setting);
-    let list = $("<ul/>", {"class":"list-group overflow-auto my-2 pe-4"});
+    let list = $("<ul/>", {"class":"list-group overflow-auto my-2 mb-5"});
     if(type === "User") {
         list.append($("<a/>", {
             "class":"link-primary text-center h6",

@@ -9,6 +9,7 @@ async function get_ticket_count(viewId) {
 // Load clients into VIEW_TRACKER var
 async function load_active_views() {
   // Pull the list of views
+  // TODO: next_page = 'https://insourceservices.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical&page=[URL]'
   const response = await fetch('https://insourceservices.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical');
   const views = await response.json();
   for(let view in views.views) {
