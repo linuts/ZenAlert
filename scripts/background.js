@@ -7,14 +7,27 @@ async function get_ticket_count(viewId) {
   return (await response.json()).view_count.value;
 }
 
+async function fetch_active_views(get='https://insourceservices.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical') {
+  const response = await fetch(get);
+  const views_data = await response.json();
+  let views = views_data.views;
+
+  // NOT TESTED! Load view next pages...
+  if(views_data.next_page) {
+    const next = await fetch_active_views(views_data.next_page);
+    for(let view in next) {
+      views[view] = next[view];
+    }
+
+  }
+  return views;
+}
+
 // Load clients into VIEW_TRACKER var
 async function load_active_views() {
-  // Pull the list of views
-  // TODO: next_page = 'https://insourceservices.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical&page=[URL]'
-  const response = await fetch('https://insourceservices.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical');
-  const views = await response.json();
-  for(let view in views.views) {
-    view = views.views[view];
+  const views = await fetch_active_views();
+  for(let view in views) {
+    view = views[view];
 
     // Some client (Group) views are not restricted...
     let type = "Group";
@@ -120,7 +133,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     // ( this code is yucky and hacked together, needs work!)
     const viewId = message[0].split("_")[1];
     const viewUserTitle = message[1];
-    // TODO: TypeError: Cannot set properties of undefined (setting 'user_title')
     VIEW_TRACKER_SYNCED[viewId].user_title = viewUserTitle;
   }
 });
