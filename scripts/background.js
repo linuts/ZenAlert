@@ -122,10 +122,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const viewUserTitle = message[1];
     VIEW_TRACKER_SYNCED[viewId].user_title = viewUserTitle;
   } else {
-    if(! SUBDOMAIN) {
-      SUBDOMAIN = message;
-      load_active_views();
-    }
+    // This is kind of lazy, don't need to load this every single time...
+    SUBDOMAIN = message;
+    load_active_views();
   }
 });
 
