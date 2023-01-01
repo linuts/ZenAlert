@@ -1,4 +1,5 @@
 var VIEW_TRACKER = {}; // Holds last view sync
+var VIEW_TRACKER_SYNCED = {}; // Holds last completed view sync
 
 // Load counts for a view
 async function get_ticket_count(viewId) {
@@ -99,11 +100,12 @@ chrome.alarms.onAlarm.addListener(async function(alarm) {
           // Update the VIEW_TRACKER count
           VIEW_TRACKER[view].count = this_count;
         }
+        VIEW_TRACKER_SYNCED = VIEW_TRACKER
       }
       break;
 
     default:
-      // No Used
+      // Not Used
       break;
   }
 });
@@ -112,13 +114,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("message:", message);
   if (message === 'Sync_Views') {
     // This will send view data to content.js on request
-    sendResponse(VIEW_TRACKER);
+    sendResponse(VIEW_TRACKER_SYNCED);
   } else if(message[0].includes("title_")) {
     // Update if the user sets a title
     // ( this code is yucky and hacked together, needs work!)
     const viewId = message[0].split("_")[1];
     const viewUserTitle = message[1];
-    VIEW_TRACKER[viewId].user_title = viewUserTitle;
+    // TODO: TypeError: Cannot set properties of undefined (setting 'user_title')
+    VIEW_TRACKER_SYNCED[viewId].user_title = viewUserTitle;
   }
 });
 
