@@ -1,6 +1,6 @@
 var VIEW_TRACKER = {}; // Holds last view sync, may not be completed
 var VIEW_TRACKER_SYNCED = {}; // Holds last completed view sync
-var SUBDOMAIN = null;
+var SUBDOMAIN = "";
 
 // Load counts for a view
 async function get_ticket_count(viewId) {
@@ -8,7 +8,7 @@ async function get_ticket_count(viewId) {
   return (await response.json()).view_count.value;
 }
 
-async function fetch_active_views(get=`https://${SUBDOMAIN}.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical`) {
+async function fetch_active_views(get) {
   const response = await fetch(get);
   const views_data = await response.json();
   let views = views_data.views;
@@ -26,7 +26,7 @@ async function fetch_active_views(get=`https://${SUBDOMAIN}.zendesk.com/api/v2/v
 
 // Load clients into VIEW_TRACKER var
 async function load_active_views() {
-  const views = await fetch_active_views();
+  const views = await fetch_active_views(`https://${SUBDOMAIN}.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical`);
   for(let view in views) {
     view = views[view];
 
@@ -66,12 +66,6 @@ function push_message(message, viewTitle) {
   })
 }
 
-// Create a ticket view update alarm (needs to run once)
-chrome.alarms.create("sync-view-alarm", {
-  delayInMinutes: 0, // Try to update views at start
-  periodInMinutes: 1 // Keep trying on fail..
-});
-
 // Create a ticket count update alarm
 chrome.alarms.create("sync-count-alarm", {
   delayInMinutes: 0.1, // Hold while views load...
@@ -81,15 +75,6 @@ chrome.alarms.create("sync-count-alarm", {
 chrome.alarms.onAlarm.addListener(async function(alarm) {
   console.log("Alarm call:", alarm.name);
   switch (alarm.name) {
-
-    case "sync-view-alarm":
-      if(!Object.keys(VIEW_TRACKER).length) {
-        load_active_views();
-      } else {
-        chrome.alarms.clear(alarm.name);
-        console.log("Clear: ", alarm.name);
-      }
-      break;
 
     case "sync-count-alarm":
       console.log("Views", VIEW_TRACKER);
@@ -137,7 +122,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const viewUserTitle = message[1];
     VIEW_TRACKER_SYNCED[viewId].user_title = viewUserTitle;
   } else {
-    SUBDOMAIN = message;
+    if(! SUBDOMAIN) {
+      SUBDOMAIN = message;
+      load_active_views();
+    }
   }
 });
 
