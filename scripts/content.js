@@ -15,6 +15,8 @@ const subdomain = window.location.origin.replace("https://", '').split(".")[0]; 
 $(document).ready(async function() {
     views_container = await get_views(); // Fast data pull on load...
     $("#z-icon").addClass("pb-5"); // Fix logo padding bug after changes
+    chrome.runtime.sendMessage(subdomain);
+
 })
 
 async function get_views() {

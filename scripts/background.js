@@ -1,13 +1,14 @@
-var VIEW_TRACKER = {}; // Holds last view sync
+var VIEW_TRACKER = {}; // Holds last view sync, may not be completed
 var VIEW_TRACKER_SYNCED = {}; // Holds last completed view sync
+var SUBDOMAIN = null;
 
 // Load counts for a view
 async function get_ticket_count(viewId) {
-  const response = await fetch(`https://insourceservices.zendesk.com/api/v2/views/${viewId}/count.json`);
+  const response = await fetch(`https://${SUBDOMAIN}.zendesk.com/api/v2/views/${viewId}/count.json`);
   return (await response.json()).view_count.value;
 }
 
-async function fetch_active_views(get='https://insourceservices.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical') {
+async function fetch_active_views(get=`https://${SUBDOMAIN}.zendesk.com/api/v2/views.json?active=true&sort_by=alphabetical`) {
   const response = await fetch(get);
   const views_data = await response.json();
   let views = views_data.views;
@@ -18,8 +19,8 @@ async function fetch_active_views(get='https://insourceservices.zendesk.com/api/
     for(let view in next) {
       views[view] = next[view];
     }
-
   }
+
   return views;
 }
 
@@ -123,6 +124,7 @@ chrome.alarms.onAlarm.addListener(async function(alarm) {
   }
 });
 
+// Needs cleanup, may create an error for some subdomains
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   console.log("message:", message);
   if (message === 'Sync_Views') {
@@ -134,6 +136,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const viewId = message[0].split("_")[1];
     const viewUserTitle = message[1];
     VIEW_TRACKER_SYNCED[viewId].user_title = viewUserTitle;
+  } else {
+    SUBDOMAIN = message;
   }
 });
 
